@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>체육인의 날 참석 조회</title>
+    <link href="https://fonts.googleapis.com/css2?family=Gamja+Flower&family=Nanum+Pen+Script&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f3628;
+            --card-bg: #fdfbf7;
+            --red: #c0392b;
+            --green: #27ae60;
+            --gold: #f1c40f;
+            --text-color: #2c3e50;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: radial-gradient(white 1px, transparent 1px),
+                              radial-gradient(white 1px, transparent 1px);
+            background-size: 50px 50px;
+            background-position: 0 0, 25px 25px;
+            font-family: 'Gamja Flower', cursive;
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* 메인 타이틀 */
+        .main-header {
+            text-align: center;
+            color: var(--card-bg);
+            margin-bottom: 30px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+        .main-header h1 {
+            font-family: 'Nanum Pen Script', cursive;
+            font-size: 3.5rem;
+            margin: 0;
+            color: var(--gold);
+        }
+        .main-header p {
+            font-size: 1.5rem;
+            margin-top: 10px;
+        }
+
+        /* 검색창 스타일 */
+        .search-section {
+            background-color: var(--card-bg);
+            padding: 30px;
+            border-radius: 50px;
+            box-shadow: 0 0 30px rgba(241, 196, 15, 0.4);
+            border: 4px solid var(--gold);
+            margin-bottom: 20px;
+            text-align: center;
+            width: 100%;
+            max-width: 500px;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .santa-image {
+            position: absolute;
+            top: -55px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70px; /* Increased size for Santa image */
+            filter: drop-shadow(0 5px 5px rgba(0,0,0,0.3));
+            animation: wave 2s infinite ease-in-out;
+        }
+
+        @keyframes wave {
+            0%, 100% { transform: translateX(-50%) rotate(0deg); }
+            25% { transform: translateX(-50%) rotate(-10deg); }
+            75% { transform: translateX(-50%) rotate(10deg); }
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        input[type="text"] {
+            padding: 15px;
+            border: 2px solid var(--green);
+            border-radius: 15px;
+            font-family: 'Gamja Flower', cursive;
+            font-size: 1.3rem;
+            text-align: center;
+            outline: none;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 15px;
+            background-color: var(--red);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-family: 'Gamja Flower', cursive;
+            font-size: 1.3rem;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            box-shadow: 0 4px 0 #922b21;
+        }
+
+        button:active {
+            transform: translateY(4px);
+            box-shadow: none;
+        }
+
+        /* 결과 카드 영역 */
+        #result-container {
+            width: 100%;
+            max-width: 600px;
+            margin-top: 20px;
+            display: none; /* 초기에는 숨김 */
+        }
+
+        /* 티켓 디자인 */
+        .ticket-card {
+            background-color: var(--card-bg);
+            border: 8px solid var(--green);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.6);
+            animation: popUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popUp {
+            from { opacity: 0; transform: scale(0.8) translateY(20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .ticket-header {
+            border-bottom: 2px dashed var(--red);
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+        }
+
+        .ticket-title {
+            font-size: 2.5rem;
+            color: var(--red);
+            font-family: 'Nanum Pen Script', cursive;
+            margin: 0;
+        }
+        
+        .ticket-subtitle {
+            font-size: 1.4rem;
+            color: var(--text-color);
+            margin-top: 5px;
+        }
+
+        .group-badge {
+            display: inline-block;
+            background-color: var(--red);
+            color: white;
+            padding: 5px 20px;
+            border-radius: 20px;
+            font-size: 1.5rem;
+            margin: 15px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .member-box {
+            background-color: rgba(241, 196, 15, 0.1); /* 연한 골드 배경 */
+            padding: 20px;
+            border-radius: 10px;
+        }
+        
+        .member-label {
+            color: var(--green);
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .member-list {
+            font-size: 1.4rem;
+            line-height: 1.6;
+            color: var(--text-color);
+            word-break: keep-all;
+        }
+
+        .error-msg {
+            color: #ffcccc;
+            font-size: 1.4rem;
+            margin-top: 20px;
+            text-shadow: 0 1px 2px black;
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="main-header">
+        <h1>2025 체육인의 날</h1>
+        <p>내 조를 확인하고 입장하세요!</p>
+    </div>
+
+    <div class="search-section">
+        <img src="santa.png" alt="Santa" class="santa-image">
+        <div class="input-group">
+            <input type="text" id="nameInput" placeholder="이름을 입력하세요 (예: 손정빈)" onkeypress="if(event.keyCode==13) findGroup();">
+            <button onclick="findGroup()">내 티켓 조회하기 🎫</button>
+        </div>
+    </div>
+
+    <div id="result-container"></div>
+    <div id="error-msg" class="error-msg"></div>
+
+    <script>
+        // 학생 데이터
+        const students = [
+            { name: "박건", group: 1, luckyNumber: 71 }, { name: "이성현", group: 1, luckyNumber: 52 },
+            { name: "김원우", group: 1, luckyNumber: 3 }, { name: "정우림", group: 1, luckyNumber: 28 },
+            { name: "안은비", group: 1, luckyNumber: 47 }, { name: "이찬형", group: 1, luckyNumber: 15 },
+            { name: "이규민", group: 2, luckyNumber: 79 }, { name: "임현재", group: 2, luckyNumber: 2 },
+            { name: "조영민", group: 2, luckyNumber: 41 }, { name: "지영채", group: 2, luckyNumber: 68 },
+            { name: "김가은", group: 2, luckyNumber: 9 }, { name: "하승범", group: 2, luckyNumber: 35 },
+            { name: "윤준서", group: 3, luckyNumber: 82 }, { name: "김현준", group: 3, luckyNumber: 1 },
+            { name: "조인준", group: 3, luckyNumber: 33 }, { name: "강지윤", group: 3, luckyNumber: 60 },
+            { name: "한주니", group: 3, luckyNumber: 18 }, { name: "고경훈", group: 4, luckyNumber: 74 },
+            { name: "천성우", group: 4, luckyNumber: 56 }, { name: "안지빈", group: 4, luckyNumber: 23 },
+            { name: "권도엽", group: 4, luckyNumber: 49 }, { name: "허승채", group: 4, luckyNumber: 7 },
+            { name: "최영웅", group: 4, luckyNumber: 38 }, { name: "곽창은", group: 5, luckyNumber: 65 },
+            { name: "박경용", group: 5, luckyNumber: 21 }, { name: "송채원", group: 5, luckyNumber: 58 },
+            { name: "박소정", group: 5, luckyNumber: 11 }, { name: "현수혁", group: 5, luckyNumber: 43 },
+            { name: "이신우", group: 5, luckyNumber: 80 }, { name: "강성우", group: 6, luckyNumber: 5 },
+            { name: "국승헌", group: 6, luckyNumber: 29 }, { name: "김세웅", group: 6, luckyNumber: 76 },
+            { name: "박민서", group: 6, luckyNumber: 53 }, { name: "양준영", group: 6, luckyNumber: 39 },
+            { name: "피아오이난", group: 6, luckyNumber: 62 }, { name: "김민성", group: 7, luckyNumber: 17 },
+            { name: "김동현", group: 7, luckyNumber: 45 }, { name: "이민규", group: 7, luckyNumber: 72 },
+            { name: "이시형", group: 7, luckyNumber: 50 }, { name: "윤승민", group: 7, luckyNumber: 26 },
+            { name: "안수창", group: 7, luckyNumber: 69 }, { name: "나백철", group: 8, luckyNumber: 4 },
+            { name: "김서준", group: 8, luckyNumber: 31 }, { name: "기재민", group: 8, luckyNumber: 78 },
+            { name: "김예다움", group: 8, luckyNumber: 55 }, { name: "이다은", group: 8, luckyNumber: 20 },
+            { name: "김찬희", group: 8, luckyNumber: 64 }, { name: "민채홍", group: 9, luckyNumber: 13 },
+            { name: "문세훈", group: 9, luckyNumber: 40 }, { name: "전혜원", group: 9, luckyNumber: 81 },
+            { name: "강성민", group: 9, luckyNumber: 59 }, { name: "이윤서", group: 9, luckyNumber: 25 },
+            { name: "강경빈", group: 9, luckyNumber: 67 }, { name: "박승찬", group: 10, luckyNumber: 8 },
+            { name: "오현우", group: 10, luckyNumber: 32 }, { name: "정재훈", group: 10, luckyNumber: 75 },
+            { name: "백주현", group: 10, luckyNumber: 51 }, { name: "이정민", group: 10, luckyNumber: 19 },
+            { name: "김시우", group: 10, luckyNumber: 46 }, { name: "손현승", group: 11, luckyNumber: 73 },
+            { name: "이상찬", group: 11, luckyNumber: 54 }, { name: "채민석", group: 11, luckyNumber: 22 },
+            { name: "김민주", group: 11, luckyNumber: 66 }, { name: "노영빈", group: 11, luckyNumber: 12 },
+            { name: "박주영", group: 11, luckyNumber: 48 }, { name: "오창운", group: 12, luckyNumber: 77 },
+            { name: "이영민", group: 12, luckyNumber: 57 }, { name: "김서연", group: 12, luckyNumber: 24 },
+            { name: "정가인", group: 12, luckyNumber: 61 }, { name: "신동화", group: 12, luckyNumber: 10 },
+            { name: "송민혁", group: 12, luckyNumber: 36 }, { name: "김민재", group: 13, luckyNumber: 63 },
+            { name: "조배홍", group: 13, luckyNumber: 16 }, { name: "정대원", group: 13, luckyNumber: 42 },
+            { name: "김채원", group: 13, luckyNumber: 70 }, { name: "쉬페이썬", group: 13, luckyNumber: 27 },
+            { name: "신연지", group: 13, luckyNumber: 5 }, { name: "정도현", group: 14, luckyNumber: 34 },
+            { name: "정준우", group: 14, luckyNumber: 6 }, { name: "이유나", group: 14, luckyNumber: 29 },
+            { name: "심다희", group: 14, luckyNumber: 72 }, { name: "이상명", group: 14, luckyNumber: 53 }
+        ];
+
+        function findGroup() {
+            const inputName = document.getElementById('nameInput').value.trim();
+            const resultContainer = document.getElementById('result-container');
+            const errorMsg = document.getElementById('error-msg');
+            const searchSection = document.querySelector('.search-section');
+
+            resultContainer.innerHTML = "";
+            resultContainer.style.display = "none";
+            errorMsg.innerText = "";
+            searchSection.style.display = "block";
+
+            if (!inputName) {
+                errorMsg.innerText = "이름을 입력해주세요!";
+                return;
+            }
+
+            const foundStudent = students.find(student => student.name === inputName);
+
+            if (foundStudent) {
+                const groupMembers = students.filter(student => student.group === foundStudent.group);
+                const memberNames = groupMembers.map(student => student.name);
+
+                const htmlContent = `
+                    <div class="ticket-card">
+                        <div class="ticket-header">
+                            <div class="ticket-title">HAPPY PE's DAY</div>
+                            <div class="ticket-subtitle">🎄 ${inputName}님의 파티 티켓 🎄</div>
+                        </div>
+                        
+                        <div class="group-badge" style="background-color: var(--gold); color: var(--text-color);">
+                            행운번호: ${foundStudent.luckyNumber}
+                        </div>
+                        <br>
+                        <div class="group-badge">
+                            당신은 ${foundStudent.group}조 입니다!
+                        </div>
+
+                        <div class="member-box">
+                            <div class="member-label">우리 조 멤버들</div>
+                            <div class="member-list">
+                                ${memberNames.join(', ')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                resultContainer.innerHTML = htmlContent;
+                resultContainer.style.display = "block";
+                searchSection.style.display = "none";
+            } else {
+                errorMsg.innerText = `😢 '${inputName}'님을 명단에서 찾을 수 없습니다.`;
+                searchSection.style.display = "block";
+            }
+        }
+    </script>
+</body>
+</html>
