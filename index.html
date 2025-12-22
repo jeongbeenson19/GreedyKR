@@ -3,38 +3,199 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Liar Game (Static JSON)</title>
+  <title>Liar Game</title>
   <style>
-    body { font-family: system-ui, -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; margin: 24px; }
-    .card { max-width: 520px; padding: 16px; border: 1px solid #ddd; border-radius: 12px; }
-    label { display:block; margin-top: 12px; font-size: 14px; color:#333; }
-    input { width: 100%; box-sizing: border-box; padding: 10px; border: 1px solid #bbb; border-radius: 10px; margin-top: 6px; }
-    button { margin-top: 14px; padding: 10px 14px; border: none; border-radius: 10px; cursor: pointer; }
-    #result { margin-top: 16px; padding: 14px; border-radius: 12px; border: 1px solid #ddd; min-height: 52px; display:flex; align-items:center; }
-    .err { color:#b00020; }
-    .ok { font-size: 22px; font-weight: 700; letter-spacing: 0.5px; }
-    .hint { margin-top: 10px; font-size: 12px; color:#666; }
+    :root {
+      --bg-1: #f4f1ea;
+      --bg-2: #e9f1f7;
+      --ink: #1d232a;
+      --muted: #5d6772;
+      --accent: #ff6b35;
+      --accent-2: #1f7a8c;
+      --card: rgba(255, 255, 255, 0.82);
+      --ring: rgba(31, 122, 140, 0.2);
+      --shadow: 0 24px 60px rgba(22, 33, 45, 0.16);
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: "SUIT", "Pretendard", "Gowun Dodum", "Noto Sans KR", sans-serif;
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(1200px 600px at 10% -10%, #fff7ed 0%, transparent 60%),
+        radial-gradient(900px 500px at 100% 10%, #e3f2ff 0%, transparent 60%),
+        linear-gradient(180deg, var(--bg-1), var(--bg-2));
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 42px 18px 54px;
+      position: relative;
+      overflow-x: hidden;
+    }
+    body::before,
+    body::after {
+      content: "";
+      position: absolute;
+      inset: auto;
+      width: 260px;
+      height: 260px;
+      border-radius: 50%;
+      filter: blur(30px);
+      opacity: 0.4;
+      pointer-events: none;
+    }
+    body::before {
+      background: #ffd6ba;
+      top: -80px;
+      right: -60px;
+    }
+    body::after {
+      background: #b8d7e2;
+      bottom: -90px;
+      left: -50px;
+    }
+    .shell {
+      width: min(860px, 100%);
+      display: grid;
+      gap: 18px;
+      position: relative;
+      z-index: 1;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      border-radius: 26px;
+      padding: 26px 26px 22px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      animation: rise 0.6s ease-out;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 6px;
+    }
+    .badge {
+      font-size: 11px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: var(--ink);
+      color: #fff;
+    }
+    h2 {
+      margin: 0;
+      font-size: clamp(22px, 3vw, 28px);
+      font-family: "Nanum Myeongjo", "Gowun Batang", serif;
+    }
+    .hint {
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .fields {
+      display: grid;
+      gap: 14px;
+      margin-top: 18px;
+    }
+    label {
+      display: block;
+      font-size: 13px;
+      color: var(--muted);
+      letter-spacing: 0.2px;
+    }
+    input {
+      width: 100%;
+      margin-top: 6px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(79, 95, 113, 0.2);
+      background: rgba(255, 255, 255, 0.9);
+      transition: border 0.2s ease, box-shadow 0.2s ease;
+    }
+    input:focus {
+      outline: none;
+      border-color: var(--accent-2);
+      box-shadow: 0 0 0 4px var(--ring);
+    }
+    button {
+      margin-top: 14px;
+      padding: 12px 18px;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      background: linear-gradient(135deg, var(--accent), #ff9f68);
+      color: #fff;
+      box-shadow: 0 12px 24px rgba(255, 107, 53, 0.3);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    button:hover { transform: translateY(-1px); box-shadow: 0 16px 28px rgba(255, 107, 53, 0.35); }
+    button:active { transform: translateY(1px); }
+    #result {
+      margin-top: 16px;
+      padding: 16px;
+      border-radius: 16px;
+      border: 1px dashed rgba(79, 95, 113, 0.25);
+      min-height: 58px;
+      display: flex;
+      align-items: center;
+      font-size: 15px;
+      background: rgba(255, 255, 255, 0.7);
+    }
+    .err { color: #b00020; font-weight: 600; }
+    .ok { font-size: 22px; font-weight: 700; letter-spacing: 0.5px; color: var(--accent-2); }
+    .footer {
+      font-size: 12px;
+      color: var(--muted);
+      text-align: center;
+    }
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(14px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @media (min-width: 720px) {
+      .fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      button { width: 220px; }
+    }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h2 style="margin:0 0 8px 0;">Liar Game (정적 JSON)</h2>
-    <div class="hint">게임번호 + 이름을 입력하면 words.json에서 찾아서 단어를 보여줍니다.</div>
+  <main class="shell">
+    <section class="card">
+      <div class="header">
+        <span class="badge">liar game</span>
+        <h2>Liar Game</h2>
+      </div>
+      <div class="hint">게임번호 + 이름을 입력하면 단어를 보여줍니다.</div>
 
-    <label for="gameId">게임 번호</label>
-    <input id="gameId" placeholder="예: 1001" autocomplete="off" inputmode="numeric" />
+      <div class="fields">
+        <label for="gameId">
+          게임 번호
+          <input id="gameId" placeholder="예: 1001" autocomplete="off" inputmode="numeric" />
+        </label>
 
-    <label for="name">이름</label>
-    <input id="name" placeholder="예: 철수" autocomplete="off" />
+        <label for="name">
+          이름
+          <input id="name" placeholder="예: 정빈" autocomplete="off" />
+        </label>
+      </div>
+      <div style="align-self: center;">
+        <button id="btn">단어 보기</button>
+      </div>
 
-    <button id="btn">단어 보기</button>
+      <div id="result"></div>
 
-    <div id="result"></div>
+      <div class="hint">
+      </div>
+    </section>
 
-    <div class="hint">
-      ⚠️ 이 방식은 개발자도구로 words.json을 열면 전체 단어가 노출됩니다.
-    </div>
-  </div>
+    <div class="footer">Made by JB</div>
+  </main>
 
   <script>
     const $gameId = document.getElementById('gameId');
